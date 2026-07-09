@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>KariyerAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1F2A4D;
+    --secondary: #FF7A59;
+    --bg: #F4F5F9;
+    --card: #FFFFFF;
+    --border: #E7E9F1;
+    --muted: #8A8FA3;
+    --success-bg: #EAF7EE;
+    --success-text: #1E8E4E;
+    --danger-bg: #FDEAEA;
+    --danger-text: #B03030;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--primary);
+    margin: 0;
+    padding: 0;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; margin: 0 0 4px; }
+  h2 { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; margin: 0 0 14px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  input[type=text], input[type=email] {
+    width: 100%;
+    padding: 11px 13px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: #FAFBFD;
+  }
+  input[type=text]:focus, input[type=email]:focus, textarea:focus { outline: 2px solid var(--secondary); background: white; }
+  textarea {
+    width: 100%; min-height: 130px; padding: 11px 13px; margin-bottom: 12px;
+    border: 1px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif;
+    font-size: 14px; background: #FAFBFD; resize: vertical;
+  }
+  label { font-size: 13px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 6px; }
+  button {
+    background: var(--secondary); color: white; border: none;
+    padding: 11px 22px; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.88; }
+  button.secondary-btn { background: var(--primary); }
+  button.ghost { background: transparent; color: var(--primary); border: 1px solid var(--border); }
+  button:disabled { background: #D4D7E2; cursor: not-allowed; }
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .role-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.15s;
+  }
+  .role-card:hover { border-color: var(--secondary); transform: translateY(-2px); }
+  .role-card .emoji { font-size: 34px; margin-bottom: 10px; }
+  .role-card h3 { font-family: 'Sora', sans-serif; margin: 0 0 6px; font-size: 16px; }
+  .role-card p { color: var(--muted); font-size: 13px; margin: 0; }
+  .back-link { cursor: pointer; color: var(--muted); font-size: 13px; margin-bottom: 16px; display: inline-block; }
+  .back-link:hover { color: var(--primary); }
+  #status { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .job-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .job-row:last-child { border-bottom: none; }
+  .job-row-title { font-weight: 600; font-size: 14px; }
+  .job-row-company { color: var(--muted); font-size: 12px; }
+  .job-row-preview { color: var(--muted); font-size: 12px; margin-top: 3px; max-width: 500px; }
+  .del-btn { background: transparent; color: var(--danger-text); font-size: 12px; padding: 6px 10px; }
+
+  .score-badge {
+    display: inline-block; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px;
+    color: var(--secondary); margin-right: 8px;
+  }
+  .match-card { border-left: 4px solid var(--secondary); }
+  .match-card.low { border-left-color: var(--border); opacity: 0.85; }
+  .tag {
+    display: inline-block; background: var(--success-bg); color: var(--success-text);
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; margin: 2px 4px 2px 0; font-weight: 500;
+  }
+  .tag.missing { background: var(--danger-bg); color: var(--danger-text); }
+  .recommend {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 4px;
+  }
+  .recommend.evet { background: var(--success-bg); color: var(--success-text); }
+  .recommend.kismen { background: #FFF4E5; color: #B26A00; }
+  .recommend.hayir { background: var(--danger-bg); color: var(--danger-text); }
+  .section-label {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.04em; margin: 26px 0 12px;
+  }
+  .welcome-banner {
+    background: var(--primary); color: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 20px;
+    font-family: 'Sora', sans-serif; font-weight: 600; font-size: 15px;
+  }
+  .empty-state { color: var(--muted); font-size: 14px; text-align: center; padding: 30px 0; }
+  .spinner {
+    display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border);
+    border-top-color: var(--secondary); border-radius: 50%; animation: spin 0.7s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .detail-toggle {
+    background: transparent; color: var(--secondary); border: none; padding: 4px 0;
+    font-size: 12.5px; font-weight: 600; cursor: pointer; margin-top: 8px; display: inline-flex;
+    align-items: center; gap: 4px;
+  }
+  .detail-toggle:hover { text-decoration: underline; opacity: 1; }
+  .detail-toggle .arrow { display: inline-block; transition: transform 0.15s; font-size: 10px; }
+  .detail-toggle.open .arrow { transform: rotate(90deg); }
+  .req-list { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; display: none; }
+  .req-list.open { display: block; }
+  .req-row { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+  .req-row:last-child { border-bottom: none; }
+  .req-icon { flex-shrink: 0; width: 18px; text-align: center; font-size: 13px; margin-top: 1px; }
+  .req-body { flex: 1; min-width: 0; }
+  .req-name { font-weight: 600; font-size: 13px; }
+  .req-tur { font-size: 10.5px; color: var(--muted); margin-left: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
+  .req-kanit { color: var(--muted); font-size: 12px; margin-top: 2px; line-height: 1.4; }
+  .other-job-card {
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: var(--card);
+    overflow: hidden;
+  }
+  .other-job-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; font-size: 13px; cursor: pointer;
+  }
+  .other-job-row:hover { background: #FAFBFD; }
+  .other-job-row .score { color: var(--muted); font-weight: 700; }
+  .other-job-detail { padding: 0 16px 14px; display: none; }
+  .other-job-detail.open { display: block; }
+  .other-job-eval { font-size: 13px; color: var(--primary); margin: 4px 0 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <div>
+    <h1>KariyerAI</h1>
+    <p class="subtitle">Yapay zeka destekli CV analizi ve iş eşleştirme</p>
+  </div>
+</div>
+
+<div id="landing">
+  <div class="role-grid">
+    <div class="role-card" onclick="showView('employer')">
+      <div class="emoji">🏢</div>
+      <h3>İş Veren</h3>
+      <p>İlan yayınla, adaylara ulaş</p>
+    </div>
+    <div class="role-card" onclick="showView('seeker')">
+      <div class="emoji">🎓</div>
+      <h3>İş Arayan</h3>
+      <p>CV'ni yükle, sana uygun ilanları gör</p>
+    </div>
+  </div>
+</div>
+
+<div id="employerView" style="display:none;">
+  <span class="back-link" onclick="showView('landing')">&larr; Geri</span>
+  <div class="card">
+    <h2>Yeni İlan</h2>
+    <label>Pozisyon Adı</label>
+    <input type="text" id="jobTitle" placeholder="örn: AI Engineer">
+    <label>Şirket (opsiyonel)</label>
+    <input type="text" id="jobCompany" placeholder="örn: Acme Yazılım">
+    <label>İlan Metni</label>
+    <textarea id="jobText" placeholder="İlan detaylarını buraya yapıştır"></textarea>
+    <button onclick="submitJob()">İlanı Yayınla</button>
+    <p id="employerStatus"></p>
+  </div>
+  <div class="card">
+    <h2>Yayındaki İlanlar</h2>
+    <div id="jobsList" class="empty-state">Yükleniyor...</div>
+  </div>
+</div>
+
+<div id="seekerLogin" style="display:none;">
+  <span class="back-link" onclick="showView('landing')">&larr; Geri</span>
+  <div class="card">
+    <h2>Giriş</h2>
+    <label>Ad Soyad</label>
+    <input type="text" id="candName" placeholder="Adın Soyadın">
+    <label>E-posta</label>
+    <input type="email" id="candEmail" placeholder="ornek@mail.com">
+    <button onclick="checkCandidate()">Devam Et</button>
+    <p id="loginStatus"></p>
+  </div>
+</div>
+
+<div id="cvUploadView" style="display:none;">
+  <span class="back-link" onclick="showView('seekerLogin')">&larr; Geri</span>
+  <div class="card">
+    <h2>CV'ni Yükle</h2>
+    <p class="subtitle" style="margin-bottom:14px;">Bu, sadece ilk seferde yapılır. Sonraki girişlerinde tekrar analiz gerekmez.</p>
+    <input type="file" id="cvFile" accept="application/pdf">
+    <br><br>
+    <button onclick="uploadCv()">CV'yi Analiz Et</button>
+    <p id="uploadStatus"></p>
+  </div>
+</div>
+
+<div id="jobsView" style="display:none;">
+  <span class="back-link" onclick="showView('landing')">&larr; Geri</span>
+  <div id="welcomeBanner" class="welcome-banner"></div>
+  <div id="matchesContainer">Yükleniyor...</div>
+</div>
+
+</div>
+
+<script>
+let currentCandidate = null;
+
+const VIEW_MAP = {
+  landing: 'landing',
+  employer: 'employerView',
+  seeker: 'seekerLogin',
+  employerView: 'employerView',
+  seekerLogin: 'seekerLogin',
+  cvUploadView: 'cvUploadView',
+  jobsView: 'jobsView'
+};
+
+function showView(view) {
+  const targetId = VIEW_MAP[view] || view;
+  ['landing','employerView','seekerLogin','cvUploadView','jobsView'].forEach(v => {
+    document.getElementById(v).style.display = (v === targetId) ? 'block' : 'none';
+  });
+  if (targetId === 'employerView') loadJobs();
+}
+
+// ---------- İş Veren ----------
+async function loadJobs() {
+  const res = await fetch('/jobs');
+  const data = await res.json();
+  const container = document.getElementById('jobsList');
+  if (data.jobs.length === 0) {
+    container.innerHTML = '<div class="empty-state">Henüz ilan eklenmedi.</div>';
+    return;
+  }
+  container.innerHTML = data.jobs.map(j => `
+    <div class="job-row">
+      <div>
+        <div class="job-row-title">${j.title} ${j.company ? '<span class="job-row-company">— ' + j.company + '</span>' : ''}</div>
+        <div class="job-row-preview">${j.text.slice(0, 130)}...</div>
+      </div>
+      <button class="del-btn" onclick="deleteJob('${j.id}')">Sil</button>
+    </div>
+  `).join('');
+}
+
+async function deleteJob(id) {
+  await fetch('/jobs/' + id, { method: 'DELETE' });
+  loadJobs();
+}
+
+async function submitJob() {
+  const title = document.getElementById('jobTitle').value.trim();
+  const company = document.getElementById('jobCompany').value.trim();
+  const text = document.getElementById('jobText').value.trim();
+  if (!title || !text) { alert('Pozisyon adı ve ilan metni zorunlu'); return; }
+  document.getElementById('employerStatus').innerText = 'Kaydediliyor...';
+  await fetch('/jobs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, company, text })
+  });
+  document.getElementById('jobTitle').value = '';
+  document.getElementById('jobCompany').value = '';
+  document.getElementById('jobText').value = '';
+  document.getElementById('employerStatus').innerText = 'İlan yayınlandı.';
+  loadJobs();
+}
+
+// ---------- İş Arayan ----------
+async function checkCandidate() {
+  const name = document.getElementById('candName').value.trim();
+  const email = document.getElementById('candEmail').value.trim();
+  if (!name || !email) { alert('Ad soyad ve e-posta gerekli'); return; }
+
+  document.getElementById('loginStatus').innerHTML = '<span class="spinner"></span>Kontrol ediliyor...';
+
+  const res = await fetch('/candidates/by-email/' + encodeURIComponent(email));
+  if (res.status === 200) {
+    const data = await res.json();
+    currentCandidate = data;
+    document.getElementById('loginStatus').innerText = '';
+    showJobsView();
+  } else {
+    document.getElementById('loginStatus').innerText = '';
+    showView('cvUploadView');
+  }
+}
+
+async function uploadCv() {
+  const fileInput = document.getElementById('cvFile');
+  if (!fileInput.files.length) { alert('Önce bir PDF seç'); return; }
+
+  document.getElementById('uploadStatus').innerHTML = '<span class="spinner"></span>CV analiz ediliyor, bu biraz sürebilir...';
+
+  const formData = new FormData();
+  formData.append('name', document.getElementById('candName').value.trim());
+  formData.append('email', document.getElementById('candEmail').value.trim());
+  formData.append('file', fileInput.files[0]);
+
+  const res = await fetch('/candidates', { method: 'POST', body: formData });
+  const data = await res.json();
+  currentCandidate = data;
+  document.getElementById('uploadStatus').innerText = '';
+  showJobsView();
+}
+
+async function showJobsView() {
+  showView('jobsView');
+  document.getElementById('welcomeBanner').innerText = 'Hoş geldin, ' + currentCandidate.name;
+  document.getElementById('matchesContainer').innerHTML = '<div class="empty-state"><span class="spinner"></span>İlanlar eşleştiriliyor...</div>';
+
+  const res = await fetch('/candidates/' + currentCandidate.id + '/matches');
+  const data = await res.json();
+  renderMatches(data);
+}
+
+const DURUM_ICON = { karsilaniyor: '✅', kismen: '🟡', karsilanmiyor: '❌' };
+const DURUM_LABEL = { karsilaniyor: 'Karşılıyor', kismen: 'Kısmen karşılıyor', karsilanmiyor: 'Karşılamıyor' };
+
+function renderReqList(gereksinimler) {
+  if (!gereksinimler || gereksinimler.length === 0) {
+    return '<div style="color:var(--muted); font-size:12px;">Detaylı değerlendirme mevcut değil.</div>';
+  }
+  return gereksinimler.map(g => {
+    const icon = DURUM_ICON[g.durum] || '•';
+    const label = DURUM_LABEL[g.durum] || g.durum || '';
+    const tur = g.tur === 'tercih' ? 'Tercih' : 'Zorunlu';
+    const kanit = g.kanit && g.kanit !== 'kanit yok' ? g.kanit : 'CV\'de kanıt bulunamadı';
+    return `
+      <div class="req-row">
+        <div class="req-icon">${icon}</div>
+        <div class="req-body">
+          <span class="req-name">${g.gereksinim || ''}</span><span class="req-tur">${tur} · ${label}</span>
+          <div class="req-kanit">${kanit}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleReqList(id) {
+  const list = document.getElementById('req-' + id);
+  const btn = document.getElementById('toggle-' + id);
+  if (!list) return;
+  const isOpen = list.classList.toggle('open');
+  if (btn) {
+    btn.classList.toggle('open', isOpen);
+    btn.querySelector('.label').innerText = isOpen ? 'Detaylı değerlendirmeyi gizle' : 'Detaylı değerlendirmeyi gör';
+  }
+}
+
+function toggleOtherDetail(id) {
+  const detail = document.getElementById('other-detail-' + id);
+  if (!detail) return;
+  detail.classList.toggle('open');
+}
+
+function renderMatches(data) {
+  const container = document.getElementById('matchesContainer');
+  if (data.suitable.length === 0 && data.others.length === 0) {
+    container.innerHTML = '<div class="empty-state">Sistemde henüz ilan yok.</div>';
+    return;
+  }
+
+  let html = '';
+
+  if (data.suitable.length > 0) {
+    html += '<div class="section-label">Sana Uygun İlanlar</div>';
+    data.suitable.forEach(r => {
+      html += `
+        <div class="card match-card">
+          <div><span class="score-badge">%${r.similarity_score}</span><strong>${r.job_title}</strong> ${r.company ? '<span style="color:var(--muted); font-size:13px;">— ' + r.company + '</span>' : ''}</div>
+          <p style="font-size:14px; margin:10px 0;">${r.kisa_degerlendirme}</p>
+          <div style="margin-bottom:6px;">${r.eslesen_beceriler.map(s => `<span class="tag">${s}</span>`).join('')}</div>
+          <div style="margin-bottom:8px;">${r.eksik_beceriler.map(s => `<span class="tag missing">${s}</span>`).join('')}</div>
+          <span class="recommend ${r.tavsiye_edilir_mi}">${r.tavsiye_edilir_mi === 'evet' ? 'Tavsiye edilir' : r.tavsiye_edilir_mi === 'kismen' ? 'Kısmen uygun' : 'Uygun değil'}</span>
+          <div>
+            <button id="toggle-${r.job_id}" class="detail-toggle" onclick="toggleReqList('${r.job_id}')">
+              <span class="arrow">▶</span><span class="label">Detaylı değerlendirmeyi gör</span>
+            </button>
+          </div>
+          <div id="req-${r.job_id}" class="req-list">${renderReqList(r.gereksinim_degerlendirmesi)}</div>
+        </div>
+      `;
+    });
+  }
+
+  if (data.others.length > 0) {
+    html += '<div class="section-label">Diğer İlanlar</div>';
+    data.others.forEach(r => {
+      html += `
+        <div class="other-job-card">
+          <div class="other-job-row" onclick="toggleOtherDetail('${r.job_id}')">
+            <div><strong>${r.job_title}</strong> ${r.company ? '<span style="color:var(--muted);"> — ' + r.company + '</span>' : ''}</div>
+            <div class="score">%${r.similarity_score}</div>
+          </div>
+          <div id="other-detail-${r.job_id}" class="other-job-detail">
+            ${r.kisa_degerlendirme ? `<div class="other-job-eval">${r.kisa_degerlendirme}</div>` : ''}
+            ${renderReqList(r.gereksinim_degerlendirmesi)}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+</script>
+</body>
+</html>
