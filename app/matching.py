@@ -124,3 +124,67 @@ def recommendation_from_score(score: float) -> str:
     if score >= 50:
         return "kismen"
     return "hayir"
+
+
+# ---------- "Uygun / Diger" esigi ve API cevap satirlarinin olusturulmasi ----------
+# Bu fonksiyonlar router'lardan cagrilir - amac router'larin sadece HTTP/DB
+# orkestrasyonu yapmasi, is kurallarinin (esik, hangi alanlarin donecegi) TEK
+# yerde (burada) tutulmasidir.
+
+SUITABLE_FLOOR = 35.0     # bu skorun altindaki hicbir ilan 'uygun' sayilmaz
+SUITABLE_MARGIN = 15.0    # adayin en yuksek skorundan bu kadar puan icindeki ilanlar da 'uygun' sayilir
+
+
+def compute_dynamic_threshold(scores: list) -> float:
+    """Adayin en yuksek skoruna gore goreceli 'uygun ilan' esigini hesaplar.
+    Sabit bir esik, farkli CV'lerin genel skor seviyesi farkli ciktiginda
+    gercekten en uygun ilani bile eleyebilir."""
+    max_score = max(scores, default=0.0)
+    return max(SUITABLE_FLOOR, max_score - SUITABLE_MARGIN)
+
+
+def build_match_entry(job: dict, score: float, explanation: dict, is_favorite: bool = False) -> dict:
+    """Aday->ilan yonunde API'nin donecegi tek bir eslesme satirini olusturur."""
+    return {
+        "job_id": job["id"],
+        "job_title": job["title"],
+        "company": job.get("company", ""),
+        "similarity_score": round(score, 1),
+        "eslesen_beceriler": explanation.get("eslesen_beceriler", []),
+        "eksik_beceriler": explanation.get("eksik_beceriler", []),
+        "kisa_degerlendirme": explanation.get("kisa_degerlendirme", ""),
+        "tavsiye_edilir_mi": explanation.get("tavsiye_edilir_mi", ""),
+        "gereksinim_degerlendirmesi": explanation.get("gereksinim_degerlendirmesi", []),
+        "is_favorite": is_favorite,
+    }
+
+
+def build_candidate_entry(candidate: dict, score: float, explanation: dict) -> dict:
+    """Ilan->aday yonunde (isveren havuzu) API'nin donecegi tek bir satiri olusturur.
+    Iletisim alanlari (phone/linkedin/github/location) isverenin adayla
+    iletisime gecebilmesi icin dahil edilir."""
+    return {
+        "candidate_id": candidate["id"],
+        "name": candidate["name"],
+        "email": candidate["email"],
+        "phone": candidate.get("phone") or "",
+        "linkedin": candidate.get("linkedin") or "",
+        "github": candidate.get("github") or "",
+        "location": candidate.get("location") or "",
+        "similarity_score": round(score, 1),
+        "eslesen_beceriler": explanation.get("eslesen_beceriler", []),
+        "eksik_beceriler": explanation.get("eksik_beceriler", []),
+        "kisa_degerlendirme": explanation.get("kisa_degerlendirme", ""),
+        "tavsiye_edilir_mi": explanation.get("tavsiye_edilir_mi", ""),
+        "gereksinim_degerlendirmesi": explanation.get("gereksinim_degerlendirmesi", []),
+    }
+
+
+def split_suitable_others(entries: list) -> tuple:
+    """build_match_entry ile olusturulmus satirlari dinamik esige gore
+    'suitable' ve 'others' listelerine ayirir, ikisini de skora gore azalan
+    sirada dondurur."""
+    threshold = compute_dynamic_threshold([e["similarity_score"] for e in entries])
+    suitable = sorted((e for e in entries if e["similarity_score"] >= threshold), key=lambda x: x["similarity_score"], reverse=True)
+    others = sorted((e for e in entries if e["similarity_score"] < threshold), key=lambda x: x["similarity_score"], reverse=True)
+    return suitable, others

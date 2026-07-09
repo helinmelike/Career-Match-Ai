@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>KariyerAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="goHome()">
+      <label class="logo-wrap" title="Logo değiştirmek için tıkla" onclick="event.stopPropagation();">
+        <img id="siteLogoImg" src="/logo.svg" alt="Logo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';">
+        <span id="logoFallback" class="logo-fallback">KA</span>
+        <input type="file" id="logoUploadInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none;" onchange="uploadLogo()">
+      </label>
+      <div>
+        <div class="brand-name">KariyerAI</div>
+        <div class="brand-tag">Yapay zeka destekli iş eşleştirme</div>
+      </div>
+    </div>
+    <div class="nav-links" id="navLinks"></div>
+    <div class="nav-user" id="navUser"></div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<div id="landing">
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="eyebrow ai">YAPAY ZEKA DESTEKLİ İŞ EŞLEŞTİRME</span>
+      <h1 class="hero-title">Doğru yeteneği,<br>doğru işle buluşturuyoruz</h1>
+      <p class="hero-sub">CV'ni yükle, yapay zeka seninle en çok örtüşen ilanları saniyeler içinde sıralasın — her eşleşmenin neden önerildiğini de gör. İşveren tarafında da aynı zeka, aday havuzunu senin için sıralar.</p>
+      <div class="hero-cta">
+        <button class="btn-pill" onclick="showView('seekerEntry')">İş Arıyorum</button>
+        <button class="ghost btn-pill" onclick="showView('employerEntry')">İlan Vermek İstiyorum</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-badge">
+        <span class="score-badge">%92</span><strong>AI Engineer — Acme Yazılım</strong>
+        <div style="color:var(--muted); font-size:12px; margin-top:6px; line-height:1.5;">Python, LangChain ve RAG deneyimin bu ilanla güçlü bir eşleşme sağlıyor.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <div class="section-label" style="text-align:center;">NEDEN KARİYERAI</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon-badge" style="--role-accent-bg: var(--accent-ai-bg);">🧠</div>
+        <h4>Kanıta Dayalı Analiz</h4>
+        <p>CV'ni sadece anahtar kelimeyle değil, projelerindeki gerçek kanıtlarla değerlendirir.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon-badge" style="--role-accent-bg: #FFF1EC;">🔍</div>
+        <h4>Şeffaf Değerlendirme</h4>
+        <p>Her ilan için hangi gereksinimin karşılandığını, hangisinin eksik olduğunu tek tek görürsün.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon-badge" style="--role-accent-bg: var(--success-bg);">⚡</div>
+        <h4>Dakikalar İçinde</h4>
+        <p>Kayıt ol, CV'ni yükle — sonuç saniyeler içinde hazır, tekrar analiz gerekmez.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label" style="text-align:center;">HEMEN BAŞLA</div>
+    <div class="role-grid">
+      <div class="role-card" style="--role-accent: var(--accent-ai); --role-accent-bg: var(--accent-ai-bg);" onclick="showView('employerEntry')">
+        <div class="icon-badge">🏢</div>
+        <h3>İş Veren</h3>
+        <p>İlan yayınla, yapay zekanın sıraladığı aday havuzuna anında ulaş.</p>
+      </div>
+      <div class="role-card" style="--role-accent: var(--secondary); --role-accent-bg: #FFF1EC;" onclick="showView('seekerEntry')">
+        <div class="icon-badge">🎓</div>
+        <h3>İş Arayan</h3>
+        <p>CV'ni yükle, sana en uygun ilanları ve neden uyduklarını gör.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="employerEntry" style="display:none;">
+  <span class="back-link" onclick="showView('landing')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel">
+      <span class="panel-eyebrow">İŞ VEREN</span>
+      <h3>İşe alımı yapay zekayla hızlandırın</h3>
+      <p>İlan yayınlayın, sistem CV havuzunuzu otomatik sıralasın.</p>
+      <ul class="auth-panel-features">
+        <li>Yapay zeka destekli aday sıralaması</li>
+        <li>Sadece kendi ilanlarınızı yönetin</li>
+        <li>Her adayın neden uyduğunu görün</li>
+      </ul>
+    </div>
+    <div class="auth-form-side" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
+      <span class="eyebrow ai">HOŞ GELDİNİZ</span>
+      <h2>Devam etmek için seçin</h2>
+      <p class="profile-hint">Daha önce kayıt olduysanız giriş yapın, ilk defa geliyorsanız hesap oluşturun.</p>
+      <div style="margin-top:16px;">
+        <button class="entry-choice-btn" onclick="showView('employerLogin')">Giriş Yap</button>
+        <button class="ghost entry-choice-btn" onclick="showView('employerRegister')">Kayıt Ol</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="employerLogin" style="display:none;">
+  <span class="back-link" onclick="showView('employerEntry')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel">
+      <span class="panel-eyebrow">İŞ VEREN</span>
+      <h3>Tekrar hoş geldiniz</h3>
+      <p>Aday havuzunuza ve ilanlarınıza kaldığınız yerden devam edin.</p>
+      <ul class="auth-panel-features">
+        <li>Yapay zeka destekli aday sıralaması</li>
+        <li>Sadece kendi ilanlarınızı yönetin</li>
+        <li>Her adayın neden uyduğunu görün</li>
+      </ul>
+    </div>
+    <div class="auth-form-side">
+      <span class="eyebrow ai">GİRİŞ YAP</span>
+      <h2>Hesabınıza Girin</h2>
+      <label>E-posta</label>
+      <input type="email" id="employerLoginEmail" placeholder="ik@sirketiniz.com">
+      <label>Şifre</label>
+      <input type="password" id="employerLoginPassword" placeholder="••••••••">
+      <button class="btn-pill" onclick="doEmployerLogin()">Giriş Yap</button>
+      <p id="employerLoginStatus"></p>
+      <p style="text-align:center; margin-top:6px;"><a onclick="showView('employerForgotPassword')" style="color:var(--muted); font-size:12.5px; cursor:pointer;">Şifremi unuttum</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="employerForgotPassword" style="display:none;">
+  <span class="back-link" onclick="showView('employerLogin')">&larr; Geri</span>
+  <div class="auth-shell">
+    <div class="card">
+      <span class="eyebrow ai">ŞİFREMİ UNUTTUM</span>
+      <h2>Şifreni Sıfırla</h2>
+      <p class="profile-hint">Kayıt olurken kullandığın şirket adı ve e-postayı doğrula, yeni bir şifre belirle.</p>
+      <label>Şirket / Kurum Adı</label>
+      <input type="text" id="employerResetCompany" placeholder="Kayıtlı şirket adın">
+      <label>E-posta</label>
+      <input type="email" id="employerResetEmail" placeholder="ik@sirketiniz.com">
+      <label>Yeni Şifre</label>
+      <input type="password" id="employerResetNewPassword" placeholder="en az 6 karakter">
+      <button onclick="doEmployerPasswordReset()">Şifreyi Güncelle</button>
+      <p id="employerResetStatus"></p>
+    </div>
+  </div>
+</div>
+
+<div id="employerRegister" style="display:none;">
+  <span class="back-link" onclick="showView('employerEntry')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel">
+      <span class="panel-eyebrow">İŞ VEREN</span>
+      <h3>Doğru adaya, doğru zamanda ulaşın</h3>
+      <p>Şirket hesabınızı oluşturun, ilk ilanınızı dakikalar içinde yayınlayın.</p>
+      <ul class="auth-panel-features">
+        <li>Yapay zeka destekli aday sıralaması</li>
+        <li>Sadece kendi ilanlarınızı yönetin</li>
+        <li>Her adayın neden uyduğunu görün</li>
+      </ul>
+    </div>
+    <div class="auth-form-side">
+      <span class="eyebrow ai">KAYIT OL</span>
+      <h2>Şirket Hesabı Oluştur</h2>
+      <label>Şirket / Kurum Adı</label>
+      <input type="text" id="employerCompany" placeholder="örn: Acme Yazılım">
+      <label>E-posta</label>
+      <input type="email" id="employerRegisterEmail" placeholder="ik@sirketiniz.com">
+      <label>Şifre</label>
+      <input type="password" id="employerRegisterPassword" placeholder="en az 6 karakter">
+      <button class="btn-pill" onclick="doEmployerRegister()">Kayıt Ol</button>
+      <p id="employerRegisterStatus"></p>
+    </div>
+  </div>
+</div>
+
+<div id="employerView" style="display:none;">
+  <div class="card">
+    <span class="eyebrow ai" id="jobFormEyebrow">YENİ İLAN</span>
+    <h2 id="jobFormTitle">Yeni İlan</h2>
+    <label>Pozisyon Adı</label>
+    <input type="text" id="jobTitle" placeholder="örn: AI Engineer">
+    <label>Şirket</label>
+    <input type="text" id="jobCompany" placeholder="örn: Acme Yazılım">
+    <label>İlan Metni</label>
+    <textarea id="jobText" placeholder="İlan detaylarını buraya yapıştır"></textarea>
+    <button id="jobSubmitBtn" onclick="submitJob()">İlanı Yayınla</button>
+    <span id="jobCancelEditBtn" class="cancel-edit-link" style="display:none;" onclick="cancelEditJob()">İptal</span>
+    <p id="employerStatus"></p>
+  </div>
+  <div class="card">
+    <h2>Yayındaki İlanlar</h2>
+    <input type="text" id="jobSearchInput" class="job-search-input" placeholder="İlan ara (başlık, şirket, içerik)..." oninput="filterJobs()">
+    <div id="jobsList" class="empty-state">Yükleniyor...</div>
+  </div>
+</div>
+
+<div id="jobCandidatesView" style="display:none;">
+  <span class="back-link" onclick="showView('employerView')">&larr; İlanlara geri dön</span>
+  <div id="jobCandidatesHeader" class="welcome-banner"></div>
+  <div id="jobCandidatesStats" class="card" style="display:none;"></div>
+  <div id="jobCandidatesContainer">Yükleniyor...</div>
+</div>
+
+<div id="seekerEntry" style="display:none;">
+  <span class="back-link" onclick="showView('landing')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel" style="background: linear-gradient(135deg, #0B5FEA 0%, #4B7BF5 100%);">
+      <span class="panel-eyebrow">İŞ ARAYAN</span>
+      <h3>Sana en uygun işi bul</h3>
+      <p>CV'ni yükle, yapay zeka seninle en çok örtüşen ilanları sıralasın.</p>
+      <ul class="auth-panel-features">
+        <li>CV'ni yapay zeka analiz etsin</li>
+        <li>Her ilana neden uyduğunu gör</li>
+        <li>Favorilerini kaydet, profilini yönet</li>
+      </ul>
+    </div>
+    <div class="auth-form-side" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
+      <span class="eyebrow">HOŞ GELDİN</span>
+      <h2>Devam etmek için seç</h2>
+      <p class="profile-hint">Daha önce kayıt olduysan giriş yap, ilk defa geliyorsan hesap oluştur.</p>
+      <div style="margin-top:16px;">
+        <button class="entry-choice-btn" onclick="showView('seekerLogin')">Giriş Yap</button>
+        <button class="ghost entry-choice-btn" onclick="showView('seekerRegister')">Kayıt Ol</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="seekerLogin" style="display:none;">
+  <span class="back-link" onclick="showView('seekerEntry')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel" style="background: linear-gradient(135deg, #0B5FEA 0%, #4B7BF5 100%);">
+      <span class="panel-eyebrow">İŞ ARAYAN</span>
+      <h3>Tekrar hoş geldin</h3>
+      <p>Sana uygun ilanlara ve profiline kaldığın yerden devam et.</p>
+      <ul class="auth-panel-features">
+        <li>CV'ni yapay zeka analiz etsin</li>
+        <li>Her ilana neden uyduğunu gör</li>
+        <li>Favorilerini kaydet, profilini yönet</li>
+      </ul>
+    </div>
+    <div class="auth-form-side">
+      <span class="eyebrow">GİRİŞ YAP</span>
+      <h2>Tekrar Hoş Geldin</h2>
+      <label>E-posta</label>
+      <input type="email" id="loginEmail" placeholder="ornek@mail.com">
+      <label>Şifre</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+      <button class="btn-pill" onclick="doLogin()">Giriş Yap</button>
+      <p id="loginStatus"></p>
+      <p style="text-align:center; margin-top:6px;"><a onclick="showView('seekerForgotPassword')" style="color:var(--muted); font-size:12.5px; cursor:pointer;">Şifremi unuttum</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="seekerForgotPassword" style="display:none;">
+  <span class="back-link" onclick="showView('seekerLogin')">&larr; Geri</span>
+  <div class="auth-shell">
+    <div class="card">
+      <span class="eyebrow">ŞİFREMİ UNUTTUM</span>
+      <h2>Şifreni Sıfırla</h2>
+      <p class="profile-hint">Kayıt olurken kullandığın ad soyad ve e-postayı doğrula, yeni bir şifre belirle.</p>
+      <label>Ad Soyad</label>
+      <input type="text" id="seekerResetName" placeholder="Kayıtlı adın soyadın">
+      <label>E-posta</label>
+      <input type="email" id="seekerResetEmail" placeholder="ornek@mail.com">
+      <label>Yeni Şifre</label>
+      <input type="password" id="seekerResetNewPassword" placeholder="en az 6 karakter">
+      <button onclick="doSeekerPasswordReset()">Şifreyi Güncelle</button>
+      <p id="seekerResetStatus"></p>
+    </div>
+  </div>
+</div>
+
+<div id="seekerRegister" style="display:none;">
+  <span class="back-link" onclick="showView('seekerEntry')">&larr; Geri</span>
+  <div class="auth-split">
+    <div class="auth-panel" style="background: linear-gradient(135deg, #0B5FEA 0%, #4B7BF5 100%);">
+      <span class="panel-eyebrow">İŞ ARAYAN</span>
+      <h3>Bir CV yükle, gerisini yapay zekaya bırak</h3>
+      <p>Kayıt tek seferlik — sonrasında sadece giriş yapman yeterli.</p>
+      <ul class="auth-panel-features">
+        <li>CV'ni yapay zeka analiz etsin</li>
+        <li>Her ilana neden uyduğunu gör</li>
+        <li>Favorilerini kaydet, profilini yönet</li>
+      </ul>
+    </div>
+    <div class="auth-form-side">
+      <span class="eyebrow">KAYIT OL</span>
+      <h2>Hesap Oluştur</h2>
+      <label>Ad Soyad</label>
+      <input type="text" id="candName" placeholder="Adın Soyadın">
+      <label>E-posta</label>
+      <input type="email" id="candEmail" placeholder="ornek@mail.com">
+      <label>Şifre</label>
+      <input type="password" id="candPassword" placeholder="en az 6 karakter">
+      <label>CV'n (PDF)</label>
+      <input type="file" id="cvFile" accept="application/pdf">
+      <br><br>
+      <button class="btn-pill" onclick="uploadCv()">Kayıt Ol ve CV'yi Analiz Et</button>
+      <p id="uploadStatus"></p>
+    </div>
+  </div>
+</div>
+
+<div id="jobsView" style="display:none;">
+  <div class="dashboard-grid">
+    <aside class="profile-sidebar">
+      <div class="card">
+        <span class="eyebrow">PROFİLİM</span>
+        <h2 id="sidebarName">Profil</h2>
+        <div id="sidebarCvSummary" class="sidebar-cv-summary"></div>
+        <label>Telefon</label>
+        <input type="tel" id="profilePhone" placeholder="0555 555 55 55">
+        <label>LinkedIn</label>
+        <input type="url" id="profileLinkedin" placeholder="linkedin.com/in/...">
+        <label>GitHub</label>
+        <input type="url" id="profileGithub" placeholder="github.com/...">
+        <label>Konum</label>
+        <input type="text" id="profileLocation" placeholder="örn: Bursa">
+        <button onclick="saveProfile()" style="width:100%;">Kaydet</button>
+        <p id="profileStatus"></p>
+        <hr style="border:none; border-top:1px solid var(--border); margin:16px 0;">
+        <button class="ghost" onclick="toggleCvUpdateForm()" style="width:100%; font-size:12.5px;">CV'ni Güncelle</button>
+        <div id="cvUpdateForm" style="display:none; margin-top:10px;">
+          <input type="file" id="cvUpdateFile" accept="application/pdf">
+          <button onclick="submitCvUpdate()" style="margin-top:8px; width:100%;">Yükle ve Yeniden Analiz Et</button>
+          <p id="cvUpdateStatus" style="color:var(--muted); font-size:12.5px; margin-top:6px;"></p>
+        </div>
+      </div>
+    </aside>
+    <main class="dashboard-main">
+      <label class="fav-filter-label">
+        <input type="checkbox" id="favFilterCheckbox" onchange="toggleFavoritesFilter()">
+        Sadece favorilerimi göster
+      </label>
+      <div id="matchesContainer">Yükleniyor...</div>
+    </main>
+  </div>
+</div>
+
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

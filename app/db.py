@@ -16,19 +16,32 @@ def init_db():
             id TEXT PRIMARY KEY,
             name TEXT,
             email TEXT UNIQUE,
+            password_hash TEXT,
             cv_text TEXT,
             cv_analysis TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS employers (
+            id TEXT PRIMARY KEY,
+            company_name TEXT,
+            email TEXT UNIQUE,
+            password_hash TEXT,
             created_at TEXT
         )
     """)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id TEXT PRIMARY KEY,
+            employer_id TEXT,
             title TEXT,
             company TEXT,
             text TEXT,
             job_analysis TEXT,
-            created_at TEXT
+            created_at TEXT,
+            updated_at TEXT
         )
     """)
     conn.execute("""
@@ -41,9 +54,29 @@ def init_db():
             PRIMARY KEY (candidate_id, job_id)
         )
     """)
-    try:
-        conn.execute("ALTER TABLE jobs ADD COLUMN job_analysis TEXT")
-    except sqlite3.OperationalError:
-        pass
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS favorites (
+            candidate_id TEXT,
+            job_id TEXT,
+            created_at TEXT,
+            PRIMARY KEY (candidate_id, job_id)
+        )
+    """)
+    # Eski veritabanlarinda bu kolonlar olmayabilir, varsa hata yutuluyor.
+    for stmt in (
+        "ALTER TABLE jobs ADD COLUMN job_analysis TEXT",
+        "ALTER TABLE jobs ADD COLUMN updated_at TEXT",
+        "ALTER TABLE jobs ADD COLUMN employer_id TEXT",
+        "ALTER TABLE candidates ADD COLUMN updated_at TEXT",
+        "ALTER TABLE candidates ADD COLUMN phone TEXT",
+        "ALTER TABLE candidates ADD COLUMN linkedin TEXT",
+        "ALTER TABLE candidates ADD COLUMN github TEXT",
+        "ALTER TABLE candidates ADD COLUMN location TEXT",
+        "ALTER TABLE candidates ADD COLUMN password_hash TEXT",
+    ):
+        try:
+            conn.execute(stmt)
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     conn.close()
