@@ -1,4 +1,4 @@
-  :root {
+:root {
     --primary: #171A2E;
     --secondary: #0B5FEA;
     --accent-ai: #8A12F7;
@@ -233,25 +233,21 @@
     position: sticky; top: 0; z-index: 50;
   }
   .nav-inner {
-    max-width: 1080px; margin: 0 auto; padding: 0 20px; height: 64px;
-    display: flex; align-items: center; gap: 28px;
+    max-width: 1080px; margin: 0 auto; padding: 0 20px; height: 72px;
+    display: flex; align-items: center; gap: 28px; position: relative;
   }
-  .nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
+  .nav-brand { position: relative; flex-shrink: 0; height: 100%; width: 220px; cursor: pointer; }
   .logo-wrap {
-    width: 38px; height: 38px; border-radius: 10px; overflow: hidden; cursor: pointer;
-    position: relative; flex-shrink: 0; background: var(--brand-gradient);
+    position: absolute; top: 50%; left: 0; transform: translateY(-50%);
+    height: 130px; width: auto; max-width: 340px; border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; padding: 4px 8px; z-index: 5;
   }
-  .logo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .logo-wrap img { height: 100%; width: auto; max-width: 324px; object-fit: contain; display: block; }
   .logo-fallback {
-    display: none; width: 100%; height: 100%; align-items: center; justify-content: center;
-    color: white; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px;
+    display: none; height: 70px; width: 70px; border-radius: 14px; background: var(--brand-gradient);
+    align-items: center; justify-content: center;
+    color: white; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px;
   }
-  .logo-wrap:hover::after {
-    content: '✎'; position: absolute; inset: 0; background: rgba(23,26,46,0.55);
-    color: white; display: flex; align-items: center; justify-content: center; font-size: 13px;
-  }
-  .brand-name { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 15px; line-height: 1.1; }
-  .brand-tag { color: var(--muted); font-size: 10.5px; line-height: 1.1; }
   .nav-links { display: flex; gap: 4px; flex: 1; }
   .nav-link {
     color: var(--primary); font-weight: 600; font-size: 13.5px; text-decoration: none;
@@ -264,7 +260,7 @@
 
   /* ---------- Dashboard (aday ana sayfasi) ---------- */
   .dashboard-grid { display: grid; grid-template-columns: 260px 1fr; gap: 22px; align-items: start; }
-  .profile-sidebar { position: sticky; top: 84px; }
+  .profile-sidebar { position: sticky; top: 92px; }
   .profile-sidebar .card { padding: 20px; }
   .profile-sidebar h2 { font-size: 16px; }
   .sidebar-cv-summary { margin: -4px 0 16px; }

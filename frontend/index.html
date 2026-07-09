@@ -12,14 +12,9 @@
 <nav class="site-nav">
   <div class="nav-inner">
     <div class="nav-brand" onclick="goHome()">
-      <label class="logo-wrap" title="Logo değiştirmek için tıkla" onclick="event.stopPropagation();">
+      <div class="logo-wrap">
         <img id="siteLogoImg" src="/logo.svg" alt="Logo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';">
         <span id="logoFallback" class="logo-fallback">KA</span>
-        <input type="file" id="logoUploadInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none;" onchange="uploadLogo()">
-      </label>
-      <div>
-        <div class="brand-name">KariyerAI</div>
-        <div class="brand-tag">Yapay zeka destekli iş eşleştirme</div>
       </div>
     </div>
     <div class="nav-links" id="navLinks"></div>
