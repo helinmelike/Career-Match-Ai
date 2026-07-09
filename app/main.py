@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import ai, matching
+from . import ai, matching, matching_service
 from .db import get_db, init_db
 from .pdf_utils import extract_text_from_pdf_bytes
 
@@ -119,82 +119,24 @@ async def get_matches(candidate_id: str):
     conn = get_db()
     candidate = conn.execute("SELECT * FROM candidates WHERE id = ?", (candidate_id,)).fetchone()
     job_rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC").fetchall()
-    conn.close()
 
     if not candidate:
+        conn.close()
         raise HTTPException(status_code=404, detail="candidate not found")
 
     job_list = [dict(j) for j in job_rows]
+    candidate_dict = dict(candidate)
     if not job_list:
+        conn.close()
         return {"suitable": [], "others": []}
-
-    cv_analysis = json.loads(candidate["cv_analysis"])
 
     # Her (aday, ilan) cifti icin eslesme SADECE BIR KEZ GPT ile hesaplanir ve
     # match_cache tablosuna yazilir - aday/ilan sayisi buyudukce GPT maliyetini
-    # kontrol altinda tutar.
-    conn = get_db()
+    # kontrol altinda tutar. Hesaplama mantigi matching_service'te - ilan
+    # tarafindaki /jobs/{id}/candidates endpoint'i de AYNI fonksiyonu kullanir.
     scored_entries = []
     for job in job_list:
-        cached = conn.execute(
-            "SELECT score, explanation FROM match_cache WHERE candidate_id = ? AND job_id = ?",
-            (candidate_id, job["id"]),
-        ).fetchone()
-
-        if cached:
-            score = cached["score"]
-            explanation = json.loads(cached["explanation"])
-        else:
-            job_analysis_raw = job.get("job_analysis")
-            if job_analysis_raw:
-                job_analysis = json.loads(job_analysis_raw)
-            else:
-                job_analysis = ai.analyze_job(job["text"])
-
-            # Eski semadaki ilanlarda "aranan_beceriler" tek listeydi.
-            if "zorunlu_beceriler" not in job_analysis and "aranan_beceriler" in job_analysis:
-                job_analysis = {
-                    **job_analysis,
-                    "zorunlu_beceriler": job_analysis.get("aranan_beceriler", []),
-                    "tercih_beceriler": [],
-                }
-
-            raw_result = ai.explain_match(cv_analysis, candidate["cv_text"], job_analysis, job["text"])
-            gereksinimler = raw_result.get("gereksinim_degerlendirmesi", [])
-
-            for g in gereksinimler:
-                g["durum"] = matching.normalize_durum(g.get("durum"))
-                g["tur"] = matching.normalize_tur(g.get("tur"))
-
-            matching.apply_evidence_safety_net(gereksinimler, cv_analysis, candidate["cv_text"])
-
-            score = matching.compute_match_score(
-                gereksinimler,
-                cv_deneyim=cv_analysis.get("deneyim_seviyesi"),
-                job_deneyim=job_analysis.get("deneyim_seviyesi"),
-            )
-            tavsiye = matching.recommendation_from_score(score)
-            eslesen_beceriler = [
-                g.get("gereksinim", "") for g in gereksinimler
-                if g.get("durum") in ("karsilaniyor", "kismen") and g.get("gereksinim")
-            ]
-            eksik_beceriler = [
-                g.get("gereksinim", "") for g in gereksinimler
-                if g.get("durum") == "karsilanmiyor" and g.get("gereksinim")
-            ]
-
-            explanation = {
-                "gereksinim_degerlendirmesi": gereksinimler,
-                "eslesen_beceriler": eslesen_beceriler,
-                "eksik_beceriler": eksik_beceriler,
-                "kisa_degerlendirme": raw_result.get("kisa_degerlendirme", ""),
-                "tavsiye_edilir_mi": tavsiye,
-            }
-            conn.execute(
-                "INSERT OR REPLACE INTO match_cache (candidate_id, job_id, score, explanation, computed_at) VALUES (?, ?, ?, ?, ?)",
-                (candidate_id, job["id"], score, json.dumps(explanation, ensure_ascii=False), datetime.utcnow().isoformat()),
-            )
-
+        score, explanation = matching_service.get_or_compute_match(conn, candidate_dict, job)
         scored_entries.append({"job": job, "explanation": explanation, "score": score})
 
     conn.commit()
@@ -229,6 +171,55 @@ async def get_matches(candidate_id: str):
     others.sort(key=lambda x: x["similarity_score"], reverse=True)
 
     return {"suitable": suitable, "others": others, "candidate_name": candidate["name"]}
+
+
+@app.get("/jobs/{job_id}/candidates")
+async def get_job_candidates(job_id: str):
+    """Isverenin bir ilana uygun aday havuzunu gormesi icin. Ayni skorlama
+    mantigini (matching_service) kullanir - bir aday hem kendi eslesme
+    sayfasinda hem burada ayni skoru gorur, cunku ikisi de ayni cache'i
+    okur/yazar."""
+    conn = get_db()
+    job = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+    candidate_rows = conn.execute("SELECT * FROM candidates ORDER BY created_at DESC").fetchall()
+
+    if not job:
+        conn.close()
+        raise HTTPException(status_code=404, detail="job not found")
+
+    job_dict = dict(job)
+    candidate_list = [dict(c) for c in candidate_rows]
+    if not candidate_list:
+        conn.close()
+        return {"candidates": [], "job_title": job_dict["title"]}
+
+    scored_entries = []
+    for candidate in candidate_list:
+        score, explanation = matching_service.get_or_compute_match(conn, candidate, job_dict)
+        scored_entries.append({"candidate": candidate, "explanation": explanation, "score": score})
+
+    conn.commit()
+    conn.close()
+
+    results = []
+    for e in scored_entries:
+        c = e["candidate"]
+        score = round(e["score"], 1)
+        explanation = e["explanation"]
+        results.append({
+            "candidate_id": c["id"],
+            "name": c["name"],
+            "email": c["email"],
+            "similarity_score": score,
+            "eslesen_beceriler": explanation.get("eslesen_beceriler", []),
+            "eksik_beceriler": explanation.get("eksik_beceriler", []),
+            "kisa_degerlendirme": explanation.get("kisa_degerlendirme", ""),
+            "tavsiye_edilir_mi": explanation.get("tavsiye_edilir_mi", ""),
+            "gereksinim_degerlendirmesi": explanation.get("gereksinim_degerlendirmesi", []),
+        })
+
+    results.sort(key=lambda x: x["similarity_score"], reverse=True)
+    return {"candidates": results, "job_title": job_dict["title"]}
 
 
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
